@@ -1,25 +1,35 @@
 const express = require('express')
 const app = express()
 const port = 3000
+const bodyParser= require("body-parser")
+const connection = require('./database/database')
+const perguntaModel = require('./database/pergunta')
 
-//DIZENDO PARA O EXPRESS USAR O EJS COMO VIEW ENGINE
-app.set('view engine', 'ejs')
+//Database
+connection.authenticate().then(() => {
+    console.log('Conexão feita com o banco de dados!')
+}).catch((msgErro) => {
+    console.log('Ocorreu o seguinte erro: ' + msgErro)
+})
+
+
+app.set('view engine', 'ejs')//DIZENDO PARA O EXPRESS USAR O EJS COMO VIEW ENGINE
+app.use(express.static('public'))//HABILITANDO USABILIDADE DE ARQUIVOS ESTÁTICOS
+app.use(bodyParser.urlencoded({extended:false}))//HABILITANDO O BODY-PARSER
+app.use(bodyParser.json())//TRANSFORMANDO O DADO RECEBIDO NO HTML EM JSON NO BACKEND
+
 
 //ROTAS
-app.get('/:nome?/:lang?', (req,res) => {
-    var nome = req.params.nome;
-    var lang = req.params.lang;
-    if(nome&&lang){    
-    res.render('index',{
-        nomeUser: nome,
-        langUser: lang,
-        empresaUser: "Empresa do Eliakim",
-        rendimentosUser: 5000
-    })   
-    }else{
-        res.render('home')
-    }
-    
+app.get('/', (req,res) => {
+   res.render('principal/index')
+})
+app.get('/perguntar',(req,res) => {
+    res.render('principal/perguntar')
+})
+app.post('/salvarpergunta',(req,res) =>{
+    var titulo = req.body.titulo
+    var descricao = req.body.descricao
+    res.send("Formulario recebido <br>" + "titulo: " + titulo + " " + "descricao: " + descricao)
 })
 
 
